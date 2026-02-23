@@ -5,7 +5,6 @@ import com.example.movierating.entity.Rating;
 import com.example.movierating.repository.RatingRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.stream.Collectors;
 

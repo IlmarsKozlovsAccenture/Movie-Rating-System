@@ -7,10 +7,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 class RatingServiceTest {
@@ -34,6 +36,8 @@ class RatingServiceTest {
 
         assertNotNull(saved.getId());
         assertEquals(4, saved.getScore());
+        assertEquals(1L, saved.getMovieId());
+        assertEquals("Good", saved.getComment());
     }
 
     @Test
@@ -44,5 +48,56 @@ class RatingServiceTest {
 
         double avg = service.averageForMovie(1L);
         assertEquals(3.0, avg);
+    }
+
+    @Test
+    void averageForMovie_singleRating() {
+        Rating r = new Rating(1L, 5, "Excellent");
+        when(repo.findByMovieId(1L)).thenReturn(List.of(r));
+
+        double avg = service.averageForMovie(1L);
+        assertEquals(5.0, avg);
+    }
+
+    @Test
+    void averageForMovie_emptyRatings() {
+        when(repo.findByMovieId(anyLong())).thenReturn(Collections.emptyList());
+
+        double avg = service.averageForMovie(99L);
+        assertEquals(0.0, avg);
+    }
+
+    @Test
+    void averageForMovie_multipleRatings() {
+        Rating r1 = new Rating(2L, 5, "a");
+        Rating r2 = new Rating(2L, 3, "b");
+        Rating r3 = new Rating(2L, 4, "c");
+        when(repo.findByMovieId(2L)).thenReturn(List.of(r1, r2, r3));
+
+        double avg = service.averageForMovie(2L);
+        assertEquals(4.0, avg);
+    }
+
+    @Test
+    void ratingsForMovie_returnsRatings() {
+        Rating r1 = new Rating(1L, 5, "Great");
+        r1.setId(10L);
+        Rating r2 = new Rating(1L, 4, "Good");
+        r2.setId(11L);
+        when(repo.findByMovieId(1L)).thenReturn(List.of(r1, r2));
+
+        List<RatingDTO> ratings = service.ratingsForMovie(1L);
+        assertEquals(2, ratings.size());
+        assertEquals(10L, ratings.get(0).getId());
+        assertEquals(5, ratings.get(0).getScore());
+    }
+
+    @Test
+    void ratingsForMovie_emptyList() {
+        when(repo.findByMovieId(anyLong())).thenReturn(Collections.emptyList());
+
+        List<RatingDTO> ratings = service.ratingsForMovie(99L);
+        assertEquals(0, ratings.size());
+        assertTrue(ratings.isEmpty());
     }
 }
