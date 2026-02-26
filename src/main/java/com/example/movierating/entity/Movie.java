@@ -4,6 +4,7 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"title", "year"}))
 public class Movie {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
