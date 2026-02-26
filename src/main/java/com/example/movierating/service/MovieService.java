@@ -3,6 +3,7 @@ package com.example.movierating.service;
 import com.example.movierating.dto.MovieRequestDTO;
 import com.example.movierating.dto.MovieResponseDTO;
 import com.example.movierating.entity.Movie;
+import com.example.movierating.exception.MovieAlreadyExistsException;
 import com.example.movierating.repository.MovieRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;

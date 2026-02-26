@@ -4,7 +4,7 @@ import com.example.movierating.dto.MovieRequestDTO;
 import com.example.movierating.dto.MovieResponseDTO;
 import com.example.movierating.dto.RatingRequestDTO;
 import com.example.movierating.dto.RatingResponseDTO;
-import com.example.movierating.service.MovieAlreadyExistsException;
+import com.example.movierating.exception.MovieAlreadyExistsException;
 import com.example.movierating.service.MovieService;
 import com.example.movierating.service.RatingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
