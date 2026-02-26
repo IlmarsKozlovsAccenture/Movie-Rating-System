@@ -7,24 +7,24 @@ import static org.junit.jupiter.api.Assertions.*;
 class MovieDTOTest {
 
     @Test
-    void createMovieDTO_defaultConstructor() {
-        MovieDTO dto = new MovieDTO();
+    void createMovieResponseDTO_defaultConstructor() {
+        MovieResponseDTO dto = new MovieResponseDTO();
         assertNull(dto.getId());
         assertNull(dto.getTitle());
         assertNull(dto.getYear());
     }
 
     @Test
-    void createMovieDTO_withConstructor() {
-        MovieDTO dto = new MovieDTO(1L, "Inception", 2010);
+    void createMovieResponseDTO_withConstructor() {
+        MovieResponseDTO dto = new MovieResponseDTO(1L, "Inception", 2010);
         assertEquals(1L, dto.getId());
         assertEquals("Inception", dto.getTitle());
         assertEquals(2010, dto.getYear());
     }
 
     @Test
-    void movieDTOSettersAndGetters() {
-        MovieDTO dto = new MovieDTO();
+    void movieResponseDTOSettersAndGetters() {
+        MovieResponseDTO dto = new MovieResponseDTO();
         dto.setId(5L);
         dto.setTitle("Matrix");
         dto.setYear(1999);
@@ -35,8 +35,8 @@ class MovieDTOTest {
     }
 
     @Test
-    void movieDTOWithNullValues() {
-        MovieDTO dto = new MovieDTO(null, null, null);
+    void movieResponseDTOWithNullValues() {
+        MovieResponseDTO dto = new MovieResponseDTO(null, null, null);
         assertNull(dto.getId());
         assertNull(dto.getTitle());
         assertNull(dto.getYear());

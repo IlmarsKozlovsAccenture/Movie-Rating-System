@@ -1,14 +1,14 @@
 package com.example.movierating.dto;
 
-public class RatingDTO {
+public class RatingResponseDTO {
     private Long id;
     private Long movieId;
     private int score;
     private String comment;
 
-    public RatingDTO() {}
+    public RatingResponseDTO() {}
 
-    public RatingDTO(Long id, Long movieId, int score, String comment) {
+    public RatingResponseDTO(Long id, Long movieId, int score, String comment) {
         this.id = id;
         this.movieId = movieId;
         this.score = score;

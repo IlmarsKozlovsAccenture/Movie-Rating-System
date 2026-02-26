@@ -1,11 +1,13 @@
 package com.example.movierating.service;
 
-import com.example.movierating.dto.MovieDTO;
+import com.example.movierating.dto.MovieRequestDTO;
+import com.example.movierating.dto.MovieResponseDTO;
 import com.example.movierating.entity.Movie;
 import com.example.movierating.repository.MovieRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,12 +32,23 @@ class MovieServiceTest {
         m.setId(1L);
         when(repo.save(any(Movie.class))).thenReturn(m);
 
-        MovieDTO dto = new MovieDTO(null, "X", 2020);
-        MovieDTO saved = service.createMovie(dto);
+        MovieRequestDTO dto = new MovieRequestDTO("X", 2020);
+        MovieResponseDTO saved = service.createMovie(dto);
 
         assertNotNull(saved.getId());
         assertEquals("X", saved.getTitle());
         assertEquals(2020, saved.getYear());
+        verify(repo, times(1)).save(any(Movie.class));
+    }
+
+    @Test
+    void createMovie_throwsExceptionWhenDatabaseConstraintViolated() {
+        when(repo.save(any(Movie.class)))
+                .thenThrow(new DataIntegrityViolationException("Unique constraint violated on title and year"));
+
+        MovieRequestDTO dto = new MovieRequestDTO("X", 2020);
+
+        assertThrows(MovieAlreadyExistsException.class, () -> service.createMovie(dto));
         verify(repo, times(1)).save(any(Movie.class));
     }
 
@@ -48,11 +61,11 @@ class MovieServiceTest {
 
         when(repo.save(any(Movie.class))).thenReturn(m1).thenReturn(m2);
 
-        MovieDTO dto1 = new MovieDTO(null, "Movie1", 2020);
-        MovieDTO dto2 = new MovieDTO(null, "Movie2", 2021);
+        MovieRequestDTO dto1 = new MovieRequestDTO("Movie1", 2020);
+        MovieRequestDTO dto2 = new MovieRequestDTO("Movie2", 2021);
 
-        MovieDTO saved1 = service.createMovie(dto1);
-        MovieDTO saved2 = service.createMovie(dto2);
+        MovieResponseDTO saved1 = service.createMovie(dto1);
+        MovieResponseDTO saved2 = service.createMovie(dto2);
 
         assertEquals(1L, saved1.getId());
         assertEquals(2L, saved2.getId());
@@ -65,7 +78,7 @@ class MovieServiceTest {
         m.setId(2L);
         when(repo.findAll()).thenReturn(List.of(m));
 
-        List<MovieDTO> list = service.listMovies();
+        List<MovieResponseDTO> list = service.listMovies();
         assertEquals(1, list.size());
         assertEquals(2L, list.get(0).getId());
         assertEquals("A", list.get(0).getTitle());
@@ -75,7 +88,7 @@ class MovieServiceTest {
     void listMovies_emptyList() {
         when(repo.findAll()).thenReturn(Collections.emptyList());
 
-        List<MovieDTO> list = service.listMovies();
+        List<MovieResponseDTO> list = service.listMovies();
         assertEquals(0, list.size());
         assertTrue(list.isEmpty());
     }
@@ -91,7 +104,7 @@ class MovieServiceTest {
 
         when(repo.findAll()).thenReturn(List.of(m1, m2, m3));
 
-        List<MovieDTO> list = service.listMovies();
+        List<MovieResponseDTO> list = service.listMovies();
         assertEquals(3, list.size());
         assertEquals("Movie1", list.get(0).getTitle());
         assertEquals("Movie2", list.get(1).getTitle());

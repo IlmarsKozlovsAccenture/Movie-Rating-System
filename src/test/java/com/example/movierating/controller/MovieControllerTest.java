@@ -1,7 +1,10 @@
 package com.example.movierating.controller;
 
-import com.example.movierating.dto.MovieDTO;
-import com.example.movierating.dto.RatingDTO;
+import com.example.movierating.dto.MovieRequestDTO;
+import com.example.movierating.dto.MovieResponseDTO;
+import com.example.movierating.dto.RatingRequestDTO;
+import com.example.movierating.dto.RatingResponseDTO;
+import com.example.movierating.service.MovieAlreadyExistsException;
 import com.example.movierating.service.MovieService;
 import com.example.movierating.service.RatingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,10 +40,10 @@ class MovieControllerTest {
 
     @Test
     void createMovie_shouldReturnCreatedMovie() throws Exception {
-        MovieDTO requestDto = new MovieDTO(null, "Inception", 2010);
-        MovieDTO responseDto = new MovieDTO(1L, "Inception", 2010);
+        MovieRequestDTO requestDto = new MovieRequestDTO("Inception", 2010);
+        MovieResponseDTO responseDto = new MovieResponseDTO(1L, "Inception", 2010);
         
-        when(movieService.createMovie(any(MovieDTO.class))).thenReturn(responseDto);
+        when(movieService.createMovie(any(MovieRequestDTO.class))).thenReturn(responseDto);
 
         mockMvc.perform(post("/api/movies")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -52,10 +55,24 @@ class MovieControllerTest {
     }
 
     @Test
+    void createMovie_shouldReturnConflictWhenMovieAlreadyExists() throws Exception {
+        MovieRequestDTO requestDto = new MovieRequestDTO("Inception", 2010);
+        
+        when(movieService.createMovie(any(MovieRequestDTO.class)))
+                .thenThrow(new MovieAlreadyExistsException("Movie with title 'Inception' and year 2010 already exists"));
+
+        mockMvc.perform(post("/api/movies")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error").exists());
+    }
+
+    @Test
     void listMovies_shouldReturnAllMovies() throws Exception {
-        MovieDTO movie1 = new MovieDTO(1L, "Movie1", 2020);
-        MovieDTO movie2 = new MovieDTO(2L, "Movie2", 2021);
-        List<MovieDTO> movies = Arrays.asList(movie1, movie2);
+        MovieResponseDTO movie1 = new MovieResponseDTO(1L, "Movie1", 2020);
+        MovieResponseDTO movie2 = new MovieResponseDTO(2L, "Movie2", 2021);
+        List<MovieResponseDTO> movies = Arrays.asList(movie1, movie2);
 
         when(movieService.listMovies()).thenReturn(movies);
 
@@ -69,10 +86,10 @@ class MovieControllerTest {
 
     @Test
     void addRating_shouldReturnAddedRating() throws Exception {
-        RatingDTO requestDto = new RatingDTO(null, 1L, 5, "Excellent");
-        RatingDTO responseDto = new RatingDTO(10L, 1L, 5, "Excellent");
+        RatingRequestDTO requestDto = new RatingRequestDTO(1L, 5, "Excellent");
+        RatingResponseDTO responseDto = new RatingResponseDTO(10L, 1L, 5, "Excellent");
 
-        when(ratingService.addRating(any(RatingDTO.class))).thenReturn(responseDto);
+        when(ratingService.addRating(any(RatingRequestDTO.class))).thenReturn(responseDto);
 
         mockMvc.perform(post("/api/ratings")
                 .contentType(MediaType.APPLICATION_JSON)

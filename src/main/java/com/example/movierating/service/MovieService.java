@@ -1,8 +1,10 @@
 package com.example.movierating.service;
 
-import com.example.movierating.dto.MovieDTO;
+import com.example.movierating.dto.MovieRequestDTO;
+import com.example.movierating.dto.MovieResponseDTO;
 import com.example.movierating.entity.Movie;
 import com.example.movierating.repository.MovieRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,15 +18,21 @@ public class MovieService {
         this.repository = repository;
     }
 
-    public MovieDTO createMovie(MovieDTO dto) {
-        Movie m = new Movie(dto.getTitle(), dto.getYear());
-        Movie saved = repository.save(m);
-        return new MovieDTO(saved.getId(), saved.getTitle(), saved.getYear());
+    public MovieResponseDTO createMovie(MovieRequestDTO dto) {
+        try {
+            Movie m = new Movie(dto.getTitle(), dto.getYear());
+            Movie saved = repository.save(m);
+            return new MovieResponseDTO(saved.getId(), saved.getTitle(), saved.getYear());
+        } catch (DataIntegrityViolationException e) {
+            throw new MovieAlreadyExistsException(
+                    String.format("Movie with title '%s' and year %d already exists", 
+                            dto.getTitle(), dto.getYear()));
+        }
     }
 
-    public List<MovieDTO> listMovies() {
+    public List<MovieResponseDTO> listMovies() {
         return repository.findAll().stream()
-                .map(m -> new MovieDTO(m.getId(), m.getTitle(), m.getYear()))
+                .map(m -> new MovieResponseDTO(m.getId(), m.getTitle(), m.getYear()))
                 .collect(Collectors.toList());
     }
 }
